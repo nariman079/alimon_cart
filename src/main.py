@@ -1,20 +1,20 @@
-from typing import Callable, Awaitable
+from collections.abc import Awaitable
+from typing import Callable
+
 from fastapi import FastAPI, Request, Response
 
-from src.routers import cart_router
-from src.conf.settings import async_session
 from src.conf.database import session_context
+from src.conf.settings import async_session
+from src.routers import cart_router
 
 app = FastAPI()
 
-app.include_router(
-    prefix='/api',
-    router=cart_router.cart_router
-)
+app.include_router(prefix="/api", router=cart_router.cart_router)
 
-@app.get('/ping')
+
+@app.get("/ping")
 async def ping():
-    print('ping')
+    print("ping")
     return "pong"
 
 

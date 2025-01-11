@@ -3,8 +3,8 @@ import sys
 from os import getenv
 from pathlib import Path
 
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
 from redis import Redis
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 redis = Redis()
 
@@ -16,7 +16,11 @@ if sys.platform == "win32":  # pragma: no cover
 
 PRODUCTION_MODE = False
 
-DB_URL = getenv("DB_LINK") if PRODUCTION_MODE else "postgresql+asyncpg://test:test@localhost:5431/test"
+DB_URL = (
+    getenv("DB_LINK")
+    if PRODUCTION_MODE
+    else "postgresql+asyncpg://test:test@localhost:5431/test"
+)
 
 engine = create_async_engine(
     DB_URL,
@@ -25,8 +29,3 @@ engine = create_async_engine(
 )
 
 async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
-
-
-
-
-

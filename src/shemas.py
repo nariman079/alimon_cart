@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+
 
 class CartItemBase(BaseModel):
     product_id: int
@@ -10,8 +10,10 @@ class CartItemBase(BaseModel):
     class Config:
         orm_mode = True
 
+
 class CartItemCreate(CartItemBase):
     pass
+
 
 class CartItem(CartItemBase):
     id: int
@@ -20,6 +22,7 @@ class CartItem(CartItemBase):
     class Config:
         orm_mode = True
 
+
 class CartBase(BaseModel):
     user_id: int
     total_price: float
@@ -27,13 +30,14 @@ class CartBase(BaseModel):
     class Config:
         orm_mode = True
 
+
 class CartCreate(CartBase):
     pass
 
+
 class CartSchema(CartBase):
     id: int
-    items: List[CartItem] = []
+    items: list[CartItem] = []
 
     class Config:
         orm_mode = True
-       

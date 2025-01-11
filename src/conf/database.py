@@ -4,10 +4,9 @@ from collections.abc import Sequence
 from contextvars import ContextVar
 from typing import Any, Self
 
+from sqlalchemy import MetaData, Row, Select, func, select
+from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
-
-from sqlalchemy import Row, Select, func, select, MetaData
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncAttrs
 
 session_context: ContextVar[AsyncSession | None] = ContextVar("session", default=None)
 
@@ -27,7 +26,7 @@ class DBController:
 
     async def get_first(self, stmt: Select[Any]) -> Any | None:
         """Получение первого объекта из результата"""
-        return (await  self.session.execute(stmt)).scalars().first()
+        return (await self.session.execute(stmt)).scalars().first()
 
     async def is_exists(self, stmt: Select[Any]) -> bool:
         """Проверка на существование объекта"""
@@ -42,7 +41,7 @@ class DBController:
         return (await self.session.execute(stmt)).scalars().all()
 
     async def get_paginated(
-            self, stmt: Select[Any], offset: int, limit: int
+        self, stmt: Select[Any], offset: int, limit: int
     ) -> Sequence[Any]:
         return await self.get_all(stmt.offset(offset).limit(limit))
 
@@ -59,9 +58,7 @@ class MappingBase:
         return entry
 
     @classmethod
-    def select_by_kwargs(
-            cls, *order_by: Any, **kwargs: Any
-    ) -> Select[tuple[Self]]:
+    def select_by_kwargs(cls, *order_by: Any, **kwargs: Any) -> Select[tuple[Self]]:
         if len(order_by) == 0:
             return select(cls).filter_by(**kwargs)
         return select(cls).filter_by(**kwargs).order_by(*order_by)
@@ -80,7 +77,7 @@ class MappingBase:
 
     @classmethod
     async def find_paginated_by_kwargs(
-            cls, offset: int, limit: int, *order_by: Any, **kwargs: Any
+        cls, offset: int, limit: int, *order_by: Any, **kwargs: Any
     ) -> Sequence[Self]:
         return await db.get_paginated(
             cls.select_by_kwargs(*order_by, **kwargs), offset, limit
@@ -100,6 +97,7 @@ class MappingBase:
         await db.session.delete(self)
         await db.session.flush()
 
+
 convention = {
     "ix": "ix_%(column_0_label)s",  # noqa: WPS323
     "uq": "uq_%(table_name)s_%(column_0_name)s",  # noqa: WPS323
@@ -108,7 +106,9 @@ convention = {
     "pk": "pk_%(table_name)s",  # noqa: WPS323
 }
 
+
 db_meta = MetaData(naming_convention=convention)
+
 
 class Base(AsyncAttrs, DeclarativeBase, MappingBase):
     __tablename__: str
