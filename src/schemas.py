@@ -12,7 +12,7 @@ class CartItemBase(BaseModel):
 
 
 class CartItemCreate(CartItemBase):
-    cart_id: int
+    pass
 
 
 class CartItem(CartItemBase):

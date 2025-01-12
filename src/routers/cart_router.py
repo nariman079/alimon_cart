@@ -43,19 +43,22 @@ async def create_cart(user: Annotated[get_user, Depends()]):
     }
 
 
-@cart_router.post("/cart-lines/")
+@cart_router.post("/cart-lines/", status_code=201)
 async def create_cartline(
     user: Annotated[get_user, Depends()],
-    cart_item: Annotated[CartItemCreate, Body(embed=True)],
+    cart_item: Annotated[CartItemCreate, Body()],
 ):
     product = await get_product(cart_item.product_id)
+
     total_price = cart_item.quantity * product.price
     cart_item.total_price = total_price
     cart_item.price_per_item = product.price
-    new_cart_item = await CartItem.create(**cart_item.dict())
+    cart = await Cart.find_first_by_kwargs(user_id=user.user_id)
 
+    new_cart_item = await CartItem.create(**cart_item.dict(), cart_id=cart.id)
+    
     return {
-        "message": f"CartItem added on cart {new_cart_item.cart_id} to user {user}",
+        "message": f"Товар {product.id} создан в корзине {new_cart_item.cart_id} для пользователя {user}",
         "data": {
             "cart": new_cart_item.cart_id,
             "product_id": new_cart_item.product_id,
