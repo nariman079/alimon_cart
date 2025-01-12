@@ -48,14 +48,12 @@ async def create_cartline(
     user: Annotated[get_user, Depends()],
     cart_item: Annotated[CartItemCreate, Body()],
 ):
-    product = await get_product(cart_item.product_id)
-
-    total_price = cart_item.quantity * product.price
-    cart_item.total_price = total_price
-    cart_item.price_per_item = product.price
+    """Создание товара в корзине"""
     cart = await Cart.find_first_by_kwargs(user_id=user.user_id)
-
-    new_cart_item = await CartItem.create(**cart_item.dict(), cart_id=cart.id)
+    product = await get_product(cart_item.product_id)
+    cart_item.total_price = cart_item.quantity * product.price
+    cart_item.price_per_item = product.price
+    new_cart_item = await CartItem.create(**cart_item.model_dump(), cart_id=cart.id)
     
     return {
         "message": f"Товар {product.id} создан в корзине {new_cart_item.cart_id} для пользователя {user}",
