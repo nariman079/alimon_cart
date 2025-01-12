@@ -4,15 +4,15 @@ from pydantic import BaseModel
 class CartItemBase(BaseModel):
     product_id: int
     quantity: int
-    price_per_item: float
-    total_price: float
+    price_per_item: float | None = None
+    total_price: float | None = None
 
     class Config:
         orm_mode = True
 
 
 class CartItemCreate(CartItemBase):
-    pass
+    cart_id: int
 
 
 class CartItem(CartItemBase):
@@ -41,3 +41,7 @@ class CartSchema(CartBase):
 
     class Config:
         orm_mode = True
+
+
+class AuthUser(BaseModel):
+    user_id: int

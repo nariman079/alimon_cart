@@ -1,69 +1,83 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 
-from src.depends import get_cart, get_user
+from src.depends import get_user
 from src.models import Cart, CartItem
+from src.schemas import CartItemCreate
 from src.services import get_product
 
 cart_router = APIRouter(tags=["carts"])
 
 
-@cart_router.get("/carts/{cart_id}")
-async def get_full_cart(cart_id: int):
-    cart = await Cart.find_first_by_id(cart_id)
+@cart_router.get("/carts/")
+async def get_full_cart(
+    user: Annotated[get_user, Depends()]
+):
+    """Получение корзины"""
+    cart = await Cart.find_first_by_kwargs(
+        user_id=user.user_id,
+        status='open'
+    )
     if not cart:
         raise HTTPException(
             detail="Такой корзины нет в бд", status_code=status.HTTP_404_NOT_FOUND
         )
-    return cart
+    return Response(
+        status_code=status.HTTP_201_CREATED,
+        content=cart
+    )
 
 
-@cart_router.post("/carts/")
-async def create_cart(user: Annotated[int, Depends(get_user)]):
-    """Get or create cart for user"""
-    cart = await Cart.find_first_by_kwargs(user_id=user)
+@cart_router.post("/carts/", status_code=201)
+async def create_cart(user: Annotated[get_user, Depends()]):
+    """Создание корзины"""
+    cart = await Cart.find_first_by_kwargs(user_id=user.user_id)
     if not cart:
-        cart = await Cart.create(user_id=user)
+        cart = await Cart.create(user_id=user.user_id)
     return {
-        "message": f"Created cart for user {user}",
+        "message": f"Получена корзина для пользователя {user}",
         "data": {
             "cart_id": cart.id,
         },
     }
 
 
-@cart_router.post("/carts/{cart_id}/cart-lines/")
+@cart_router.post("/cart-lines/")
 async def create_cartline(
     user: Annotated[get_user, Depends()],
-    cart: Annotated[get_cart, Depends()],
-    product_id: Annotated[int, Body()],
-    price_per_item: Annotated[int, Body()],
-    quantity: Annotated[int, Body()],
+    cart_item: Annotated[CartItemCreate, Body(embed=True)],
 ):
-    product = await get_product(product_id)
-    total_price = quantity * product.price
-    cart_item = await CartItem.create(
-        cart_id=cart,
-        product_id=product_id,
-        quantity=quantity,
-        total_price=total_price,
-        price_per_item=price_per_item,
-    )
+    product = await get_product(cart_item.product_id)
+    total_price = cart_item.quantity * product.price
+    cart_item.total_price = total_price
+    cart_item.price_per_item = product.price
+    new_cart_item = await CartItem.create(**cart_item.dict())
+
     return {
-        "message": f"CartItem added on cart {cart} to user {user}",
+        "message": f"CartItem added on cart {new_cart_item.cart_id} to user {user}",
         "data": {
-            "cart": cart,
-            "product_id": cart_item.product_id,
-            "total_price": cart_item.total_price,
+            "cart": new_cart_item.cart_id,
+            "product_id": new_cart_item.product_id,
+            "total_price": new_cart_item.total_price,
         },
     }
 
 
-# @cart_router.post('/carts/')
-# async def create_cart():
-#     pass
+@cart_router.delete("/cart-lines/delete-product/")
+async def delete_product(
+    user: Annotated[get_user, Depends()],
+    cart_id: Annotated[int, Body()],
+    product_id: Annotated[int, Body()]
+):
+    cart_line_with_products = await CartItem.find_all_by_kwargs(
+        cart_id=cart_id, product_id=product_id
+    )
+    product_count = len(cart_line_with_products)
 
-# @cart_router.post('/carts/{cart_id}/cart-lines/')
-# async def create_cartline():
-#     pass
+    for cart_line in cart_line_with_products:
+        await cart_line.delete()
+
+    return {
+        "message": f"Deleted product {product_count} from cart {cart_id}"
+    }

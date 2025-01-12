@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, ForeignKey, Integer
+from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from src.conf.database import Base
@@ -10,7 +10,7 @@ class Cart(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False, unique=True)
     total_price = Column(Float, default=0.0)
-
+    status = Column(String, default='open')
     items = relationship(
         "CartItem", back_populates="cart", cascade="all, delete-orphan", lazy="selectin"
     )
