@@ -1,6 +1,6 @@
 FROM python:3.11.10
 
-RUN pip install poetry
+RUN pip  install --no-root
 
 WORKDIR /backend/
 
