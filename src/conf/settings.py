@@ -10,21 +10,28 @@ redis = Redis()
 
 current_directory: Path = Path.cwd()
 
-if sys.platform == "win32":  # pragma: no cover
+if sys.platform == "win32":  
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-PRODUCTION_MODE = False
+PRODUCTION_MODE = getenv('PRODUCTION_MODE', '0') == '1'
 
-DB_URL = (
-    getenv("DB_LINK")
-    if PRODUCTION_MODE
-    else "postgresql+asyncpg://test:test@localhost:5431/test"
-)
+if PRODUCTION_MODE:
+    POSTGRES_USER = getenv("POSTGRES_USER")
+    POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD")
+    POSTGRES_DB = getenv("POSTGRES_DB")
+    POSTGRES_HOST = getenv("POSTGRES_HOST")
+    POSTGRES_PORT = getenv("POSTGRES_PORT")
+
+    DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+
+else:
+    DB_URL = "postgresql+asyncpg://test:test@localhost:5431/test"
+
 
 engine = create_async_engine(
     DB_URL,
-    pool_recycle=280,  # noqa: WPS432
+    pool_recycle=280,  
     echo=not PRODUCTION_MODE,
 )
 
@@ -32,4 +39,4 @@ async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
 ALGORITHM = getenv('ALGORITHM', 'HS256')
-SECRET = getenv('SECRET', 'secret')
+SECRET = getenv('SECRET_KEY', 'secret')

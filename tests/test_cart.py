@@ -7,8 +7,6 @@ from src.conf.settings import redis
 from src.main import app
 from src.schemas import CartItemCreate
 from src.services import get_product
-from src.models import CartItem
-
 
 token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.OXRl_urG-myPUh7RDv4Q7XalDMgAnk_21YIEez5oulI"
 

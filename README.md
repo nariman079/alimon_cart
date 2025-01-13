@@ -35,6 +35,9 @@
    ```
 2. Создайте файл `.env` в корне проекта и заполните его переменными окружения:
    ```env
+   PRODUCTION_MODE=0
+   SECRET_KEY=youSecretKey
+   
    POSTGRES_USER=your_user
    POSTGRES_PASSWORD=your_password
    POSTGRES_DB=cart_db
