@@ -6,7 +6,6 @@ authors = [
     {name = "nariman079",email = "nariman079i@mail.ru"}
 ]
 license = {text = "MIT"}
-readme = "README.md"
 requires-python = "3.11.10"
 dependencies = [
     "fastapi (>=0.115.6,<0.116.0)",
