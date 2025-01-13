@@ -14,13 +14,12 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-PRODUCTION_MODE = getenv('PRODUCTION_MODE', '0') == '1'
+PRODUCTION_MODE = getenv('PRODUCTION_MODE', 0) == 1
 
 REDIS_HOST = getenv("REDIS_HOST", 'localhost')
 REDIS_PORT = getenv("REDIS_PORT", 6379)
 
 if PRODUCTION_MODE:
-    
     POSTGRES_USER = getenv("POSTGRES_USER")
     POSTGRES_PASSWORD = getenv("POSTGRES_PASSWORD")
     POSTGRES_DB = getenv("POSTGRES_DB")
