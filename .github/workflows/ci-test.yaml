@@ -1,0 +1,30 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop  
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Compose
+        run: |
+          docker-compose --version
+
+      - name: Build and start containers
+        run: |
+          docker-compose up --build -d
+
+      - name: Run tests
+        run: |
+          docker-compose exec web poetry run pytest
+
+      - name: Stop containers
+        run: |
+          docker-compose down
