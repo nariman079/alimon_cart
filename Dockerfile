@@ -13,3 +13,4 @@ COPY ./tests/ /backend/tests/
 COPY ./migrations /backend/migrations/
 COPY ./alembic.ini /backend/alembic.ini
 COPY .env /backend/
+COPY README.md /backend/
