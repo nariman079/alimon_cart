@@ -33,12 +33,12 @@ jobs:
 
       - name: Build and start containers
         run: |
-          docker compose -f docker-compose-test.yaml up --build -d
+          docker compose -f docker-compose-test.yaml up --build 
 
       - name: Run tests
         run: |
-          docker compose exec app poetry run pytest
+          docker compose -f docker-compose-test.yaml exec app poetry run pytest
 
       - name: Stop containers
         run: |
-          docker compose down
+          docker compose -f docker-compose-test.yaml down
