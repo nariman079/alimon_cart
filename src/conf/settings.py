@@ -14,7 +14,7 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-PRODUCTION_MODE = getenv('PRODUCTION_MODE', 0) == 1
+PRODUCTION_MODE = True
 
 REDIS_HOST = getenv("REDIS_HOST", 'localhost')
 REDIS_PORT = getenv("REDIS_PORT", 6379)
@@ -27,7 +27,6 @@ if PRODUCTION_MODE:
     POSTGRES_PORT = getenv("POSTGRES_PORT")
 
     DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-    
 else:
     DB_URL = "postgresql+asyncpg://test:test@localhost:5431/test"
 
