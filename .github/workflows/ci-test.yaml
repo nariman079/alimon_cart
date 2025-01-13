@@ -22,6 +22,7 @@ jobs:
 
       - name: Set environment variables from Secrets
         run: |
+          echo "REDIS_HOST=cache" >> .env
           echo "PRODUCTION_MODE=1" >> .env
           echo "SECRET_KEY=secret" >> .env
           echo "POSTGRES_USER=cart_user" >> .env
