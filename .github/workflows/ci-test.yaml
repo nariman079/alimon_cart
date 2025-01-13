@@ -36,7 +36,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker-compose exec app poetry run pytest
+          docker compose exec app poetry run pytest
 
       - name: Stop containers
         run: |
