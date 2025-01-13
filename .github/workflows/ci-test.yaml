@@ -33,7 +33,7 @@ jobs:
 
       - name: Build and start containers
         run: |
-          docker compose -f docker-compose-test.yaml up --build  -d
+          docker compose -f docker-compose-test.yaml up --build  
 
       - name: Run tests
         run: |
