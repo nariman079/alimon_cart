@@ -1,8 +1,7 @@
 services:
   cache:
     image: redis
-    networks:
-      - main-net
+  
   db:
     image: postgres:latest
     env_file:
