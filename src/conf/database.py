@@ -89,9 +89,10 @@ class MappingBase:
             select(func.count(*expressions, **kwargs)).filter_by(**kwargs)
         )
 
-    def update(self, **kwargs: Any) -> None:
+    async def update(self, **kwargs: Any) -> None:
         for key, value in kwargs.items():
             setattr(self, key, value)
+        await db.session.flush()
 
     async def delete(self):
         await db.session.delete(self)
