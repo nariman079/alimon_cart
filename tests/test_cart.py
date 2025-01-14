@@ -99,7 +99,10 @@ async def test_add_item_in_cartitem_by_not_exists_item(client, headers):
             json={'product_id':3},
             headers=headers
         ),
-        expected_code=404
+        expected_code=404,
+        expected_data={
+            'detail': "Такого товара нет в корзине"
+        }
     )
     
 
