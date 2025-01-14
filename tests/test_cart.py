@@ -44,7 +44,7 @@ def test_create_cart(redis_connection, client, headers):
 async def test_create_cart_item(client, headers):
     cart_item = CartItemCreate(product_id=1, quantity=1)
     response = client.post(
-        "/api/cart-lines/",
+        "/api/cart-items/",
         json=cart_item.model_dump(),
         headers=headers,
     )
@@ -65,7 +65,7 @@ async def test_create_cart_item(client, headers):
 async def test_add_item_in_cartitem_by_exists(client, headers):
     product_id = 1
     client.post(
-        "/api/cart-lines/add-item/",
+        "/api/cart-items/increase-item/",
         json={
             'product_id': product_id
         },
@@ -73,7 +73,7 @@ async def test_add_item_in_cartitem_by_exists(client, headers):
     )
     assert_response(
         client.post(
-            "/api/cart-lines/add-item/",
+            "/api/cart-items/increase-item/",
             json={
             'product_id': product_id
         },
@@ -91,10 +91,10 @@ async def test_add_item_in_cartitem_by_exists(client, headers):
     )
 
 @pytest.mark.asyncio
-async def test_add_item_in_cartitem_by_not_exists_item(client, headers):
+async def test_increase_item_in_cart(client, headers):
     assert_response(
         client.post(
-            "/api/cart-lines/add-item/",
+            "/api/cart-items/increase-item/",
             json={'product_id':3},
             headers=headers
         ),
@@ -123,5 +123,18 @@ async def test_decrease_item_from_cart(client, headers):
         }
     )
 
+
+@pytest.mark.asyncio
+async def test_display_cart(client, headers):
+    assert_response(
+        client.get('/api/carts/', headers=headers),
+        expected_code=200,
+        expected_data={
+            'user_id': 1,
+            'total_price': 0, # TODO Потом исправить, сделать динамику
+            'status': 'open',
+            
+        }
+    )
 
 redis.delete(*range(1, 10))

@@ -18,21 +18,18 @@ async def get_full_cart(
     user: Annotated[get_user, Depends()]
 ):
     """Получение корзины"""
-    cart = await Cart.find_first_by_kwargs(
-        user_id=user.user_id,
-        status='open'
-    )
-    if not cart:
+    user_cart = await get_user_cart(user.user_id)
+    if not user_cart:
         raise HTTPException(
             detail="Такой корзины нет в бд", status_code=status.HTTP_404_NOT_FOUND
         )
-    return Response(
-        status_code=status.HTTP_201_CREATED,
-        content=cart
-    )
+    return user_cart
 
 
-@cart_router.post("/carts/", status_code=201)
+@cart_router.post(
+    "/carts/", 
+    status_code=status.HTTP_201_CREATED
+)
 async def create_cart(user: Annotated[get_user, Depends()]):
     """Создание корзины"""
     cart = await Cart.find_first_by_kwargs(user_id=user.user_id)
@@ -46,13 +43,16 @@ async def create_cart(user: Annotated[get_user, Depends()]):
     }
 
 
-@cart_router.post("/cart-lines/", status_code=201)
+@cart_router.post(
+    "/cart-items/", 
+    status_code=status.HTTP_201_CREATED
+    )
 async def create_cartline(
     user: Annotated[get_user, Depends()],
     cart_item: Annotated[CartItemCreate, Body()],
 ):
     """Создание товара в корзине"""
-    cart = await Cart.find_first_by_kwargs(user_id=user.user_id)
+    cart = await get_user_cart(user.user_id)
     product = await get_product(cart_item.product_id)
     cart_item.total_price = cart_item.quantity * product.price
     cart_item.price_per_item = product.price
@@ -68,14 +68,15 @@ async def create_cartline(
     }
 
 
-@cart_router.post("/cart-lines/add-item/", status_code=201)
+@cart_router.post(
+    "/cart-items/increase-item/", 
+    status_code=status.HTTP_201_CREATED
+)
 async def delete_product(
     user: Annotated[get_user, Depends()],
     product_id: Annotated[int, Body(embed=True)]
 ):
-    user_cart = await Cart.find_first_by_kwargs(
-        user_id=user.user_id, status='open'
-        )
+    user_cart = await get_user_cart(user.user_id)
     cart_item = await CartItem.find_first_by_kwargs(
         cart_id=user_cart.id, product_id=product_id
     )
