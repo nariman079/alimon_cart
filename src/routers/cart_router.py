@@ -65,7 +65,7 @@ async def create_cartline(
     }
 
 
-@cart_router.delete("/cart-lines/delete-product/")
+@cart_router.delete("/api/cart-lines/add-item/")
 async def delete_product(
     user: Annotated[get_user, Depends()],
     cart_id: Annotated[int, Body()],

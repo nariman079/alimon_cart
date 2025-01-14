@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from redis import Redis
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 current_directory: Path = Path.cwd()
@@ -16,10 +16,7 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-PRODUCTION_MODE = True
-
-REDIS_HOST = getenv("REDIS_HOST", 'localhost')
-REDIS_PORT = getenv("REDIS_PORT", 6379)
+PRODUCTION_MODE = getenv("PRODUCTION_MODE") == '1'
 
 if PRODUCTION_MODE:
     POSTGRES_USER = getenv("POSTGRES_USER")
@@ -28,16 +25,15 @@ if PRODUCTION_MODE:
     POSTGRES_HOST = getenv("POSTGRES_HOST")
     POSTGRES_PORT = getenv("POSTGRES_PORT")
 
+    REDIS_HOST = getenv("REDIS_HOST", 'localhost')
+    REDIS_PORT = getenv("REDIS_PORT", 6379)
+
     DB_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 else:
+    REDIS_HOST = 'localhost'
+    REDIS_PORT = 6379
     DB_URL = "postgresql+asyncpg://test:test@localhost:5431/test"
 
-print(f"POSTGRES_USER: {POSTGRES_USER}")
-print(f"POSTGRES_PASSWORD: {POSTGRES_PASSWORD}")
-print(f"POSTGRES_DB: {POSTGRES_DB}")
-print(f"POSTGRES_HOST: {POSTGRES_HOST}")
-print(f"POSTGRES_PORT: {POSTGRES_PORT}")
-print(DB_URL)
 
 engine = create_async_engine(
     DB_URL,

@@ -62,8 +62,9 @@ async def test_add_item_in_cartitem(client, headers):
         headers=headers
     )
     
-    assert response.status_code == 404
-    # assert response.json()['message'] == f"Товар {request_data['product_id']} увеличен в корзине"
-    
+    assert response.status_code == 201
+    assert response.json()["message"] == f"Увеличение количества товара {request_data['product_id']}"
+    assert response.json()['data']['prooduct_id'] == request_data['product_id']
 
+    
 redis.delete(*range(1, 10))
