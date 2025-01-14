@@ -1,9 +1,13 @@
 name: CI/CD Tests Pipeline
 
 on:
-  push:
+  pull_request:
     branches:
-      - develop  
+      - develop
+
+  
+
+  
 
 jobs:
   test:
@@ -31,7 +35,6 @@ jobs:
           echo "POSTGRES_DB=cart_db" >> .env
           echo "POSTGRES_HOST=db" >> .env
           echo "POSTGRES_PORT=5432" >> .env
-
       - name: Build and start containers
         run: |
           docker compose -f docker-compose-test.yaml up --build -d

@@ -1,13 +1,29 @@
-from collections.abc import Awaitable
+from collections.abc import AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
 from typing import Callable
 
 from fastapi import FastAPI, Request, Response
 
-from src.conf.database import session_context
-from src.conf.settings import async_session
+from src.conf.database import Base, session_context
+from src.conf.settings import PRODUCTION_MODE, async_session, engine
 from src.routers import cart_router
 
-app = FastAPI()
+
+async def reinit_database() -> None:  
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    if not PRODUCTION_MODE:
+        await reinit_database()
+        
+    yield
+
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(prefix="/api", router=cart_router.cart_router)
 
@@ -27,3 +43,4 @@ async def database_session_middleware(
     async with async_session.begin() as session:
         session_context.set(session)
         return await call_next(request)
+
