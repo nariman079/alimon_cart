@@ -92,7 +92,7 @@ async def delete_product(
     )
     
     return {
-        "message": f"Увеличение количества товара {product_id}",
+        "message": f"Увеличение количества товара",
         "data": {
             "product_id": cart_item.product_id,
             "total_price": cart_item.total_price,

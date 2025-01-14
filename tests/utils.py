@@ -4,7 +4,7 @@ from httpx import Response
 def assert_response(
     response: Response,
     expected_code: int,
-    expected_data: dict
+    expected_data: dict 
 ):
     assert response.status_code == expected_code, f"{response.status_code} != {expected_code}"
     for k, v in expected_data.items():

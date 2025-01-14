@@ -67,7 +67,6 @@ async def test_add_item_in_cartitem_by_exists(client, headers):
     request_data = {
             'product_id': product_id
         }
-    
     client.post(
         "/api/cart-lines/add-item/",
         json=request_data,
@@ -78,25 +77,30 @@ async def test_add_item_in_cartitem_by_exists(client, headers):
         json=request_data,
         headers=headers
     )
+    assert_response(
+        response,
+        expected_code=201,
+        expected_data={
+            "message": f"Увеличение количества товара",
+            "data":{
+                "product_id": product_id,
+                "total_price": 60,
+                "quantity": 3
+            }
+        }
+    )
 
-    assert response.status_code == 201
-    assert response.json()["message"] == f"Увеличение количества товара {request_data['product_id']}"
-    assert response.json()['data']['product_id'] == request_data['product_id']
-    assert response.json()['data']['total_price'] == 60
-    assert response.json()['data']['quantity'] == 3
  
 @pytest.mark.asyncio
 async def test_add_item_in_cartitem_by_not_exists_item(client, headers):
-    product_id = 3
-    request_data = {
-            'product_id': product_id
-        }
-    response = client.post(
-        "/api/cart-lines/add-item/",
-        json=request_data,
-        headers=headers
+    assert_response(
+        client.post(
+            "/api/cart-lines/add-item/",
+            json={'product_id':3},
+            headers=headers
+        ),
+        expected_code=404
     )
-    assert response.status_code == 404
     
 
 @pytest.mark.asyncio 
