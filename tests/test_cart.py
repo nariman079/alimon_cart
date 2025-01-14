@@ -87,14 +87,16 @@ async def test_add_item_in_cartitem_by_exists(client, headers):
  
 @pytest.mark.asyncio
 async def test_add_item_in_cartitem_by_not_exists_item(client, headers):
-    product_id = 3
-    request_data = {
-            'product_id': product_id
+    assert_response(
+        client.post(
+            "/api/cart-lines/add-item/",
+            json={'product_id':3},
+            headers=headers
+        ),
+        expected_code=404,
+        expected_data={
+            'detail': "Такого товара нет в корзине"
         }
-    response = client.post(
-        "/api/cart-lines/add-item/",
-        json=request_data,
-        headers=headers
     )
     assert response.status_code == 404
     
