@@ -8,11 +8,11 @@ class CartItemBase(BaseModel):
     total_price: float | None = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CartItemCreate(CartItemBase):
-    cart_id: int
+    pass
 
 
 class CartItem(CartItemBase):
@@ -20,7 +20,7 @@ class CartItem(CartItemBase):
     cart_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CartBase(BaseModel):
@@ -28,7 +28,7 @@ class CartBase(BaseModel):
     total_price: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CartCreate(CartBase):
@@ -40,7 +40,7 @@ class CartSchema(CartBase):
     items: list[CartItem] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AuthUser(BaseModel):

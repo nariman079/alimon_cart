@@ -1,0 +1,28 @@
+[project]
+name = "alimon_cart"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "nariman079",email = "nariman079i@mail.ru"}
+]
+license = {text = "MIT"}
+requires-python = "3.11.10"
+dependencies = [
+    "fastapi (>=0.115.6,<0.116.0)",
+    "sqlalchemy (>=2.0.37,<3.0.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "postgres (>=4.0,<5.0)",
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "pytest (>=8.3.4,<9.0.0)",
+    "pytest-asyncio (>=0.25.2,<0.26.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "redis (>=5.2.1,<6.0.0)",
+    "pyjwt (>=2.10.1,<3.0.0)",
+    "alembic (>=1.14.0,<2.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

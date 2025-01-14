@@ -9,6 +9,9 @@ from src.services import get_product
 
 cart_router = APIRouter(tags=["carts"])
 
+async def get_user_cart(user_id: int) -> Cart:
+    """Получение корзины пользователя"""
+    return await Cart.find_first_by_kwargs(status='open', user_id=user_id)
 
 @cart_router.get("/carts/")
 async def get_full_cart(
@@ -36,26 +39,27 @@ async def create_cart(user: Annotated[get_user, Depends()]):
     if not cart:
         cart = await Cart.create(user_id=user.user_id)
     return {
-        "message": f"Получена корзина для пользователя {user}",
+        "message": f"Корзина создана",
         "data": {
             "cart_id": cart.id,
         },
     }
 
 
-@cart_router.post("/cart-lines/")
+@cart_router.post("/cart-lines/", status_code=201)
 async def create_cartline(
     user: Annotated[get_user, Depends()],
-    cart_item: Annotated[CartItemCreate, Body(embed=True)],
+    cart_item: Annotated[CartItemCreate, Body()],
 ):
+    """Создание товара в корзине"""
+    cart = await Cart.find_first_by_kwargs(user_id=user.user_id)
     product = await get_product(cart_item.product_id)
-    total_price = cart_item.quantity * product.price
-    cart_item.total_price = total_price
+    cart_item.total_price = cart_item.quantity * product.price
     cart_item.price_per_item = product.price
-    new_cart_item = await CartItem.create(**cart_item.dict())
-
+    new_cart_item = await CartItem.create(**cart_item.model_dump(), cart_id=cart.id)
+    
     return {
-        "message": f"CartItem added on cart {new_cart_item.cart_id} to user {user}",
+        "message": f"Товар создан в корзине",
         "data": {
             "cart": new_cart_item.cart_id,
             "product_id": new_cart_item.product_id,
@@ -64,20 +68,64 @@ async def create_cartline(
     }
 
 
-@cart_router.delete("/cart-lines/delete-product/")
+@cart_router.post("/cart-lines/add-item/", status_code=201)
 async def delete_product(
     user: Annotated[get_user, Depends()],
-    cart_id: Annotated[int, Body()],
-    product_id: Annotated[int, Body()]
+    product_id: Annotated[int, Body(embed=True)]
 ):
-    cart_line_with_products = await CartItem.find_all_by_kwargs(
-        cart_id=cart_id, product_id=product_id
+    user_cart = await Cart.find_first_by_kwargs(
+        user_id=user.user_id, status='open'
+        )
+    cart_item = await CartItem.find_first_by_kwargs(
+        cart_id=user_cart.id, product_id=product_id
     )
-    product_count = len(cart_line_with_products)
 
-    for cart_line in cart_line_with_products:
-        await cart_line.delete()
+    if not cart_item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Такого товара в корзине не существует"
+        )
 
+    await cart_item.update(
+        total_price=cart_item.total_price + cart_item.price_per_item,
+        quantity=cart_item.quantity + 1
+    )
+    
     return {
-        "message": f"Deleted product {product_count} from cart {cart_id}"
+        "message": f"Увеличение количества товара {product_id}",
+        "data": {
+            "product_id": cart_item.product_id,
+            "total_price": cart_item.total_price,
+            "quantity": cart_item.quantity
+        }
+    }
+
+@cart_router.post(
+    "/cart-items/decrease-item/", 
+    status_code=status.HTTP_201_CREATED
+)
+async def decrease_cart_item(
+    user: Annotated[get_user, Depends()],
+    product_id: Annotated[int, Body(embed=True)]
+):
+    """Уменьшение количества товара"""
+    user_cart = await get_user_cart(user_id=user.user_id)
+    cart_item = await CartItem.find_first_by_kwargs(
+        product_id=product_id, cart_id=user_cart.id
+    )
+    if not cart_item:
+        raise HTTPException(
+            detail="Такого товара нет в корзине",
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+    await cart_item.update(
+        total_price=cart_item.total_price - cart_item.price_per_item,
+        quantity=cart_item.quantity - 1
+    )
+    return {
+        'message': "Уменьшение количества товара в корзине",
+        'dict': {
+            'total_price':cart_item.total_price,
+            'quantity': cart_item.quantity
+        }
     }
