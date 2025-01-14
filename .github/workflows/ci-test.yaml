@@ -23,6 +23,7 @@ jobs:
       - name: Set environment variables from Secrets
         run: |
           echo "REDIS_HOST=cache" >> .env
+          echo "REDIS_PORT=6379" >> .env
           echo "PRODUCTION_MODE=1" >> .env
           echo "SECRET_KEY=secret" >> .env
           echo "POSTGRES_USER=cart_user" >> .env
@@ -37,6 +38,7 @@ jobs:
 
       - name: Run tests
         run: |
+          sleep 10s
           docker compose -f docker-compose-test.yaml exec app poetry run pytest
 
       - name: Stop containers
